@@ -1,9 +1,38 @@
-spring.application.name=Samsung-API-Gateway
+# =========================================
+# API Gateway
+# =========================================
 
 server.port=8080
+spring.application.name=Samsung-API-Gateway
 
-spring.config.import=configserver:http://localhost:8888
+
+# =========================================
+# Redis
+# =========================================
+
+spring.data.redis.host=localhost
+spring.data.redis.port=6379
+
+
+# =========================================
+# Eureka
+# =========================================
 
 eureka.client.service-url.defaultZone=http://localhost:8761/eureka/
-eureka.client.register-with-eureka=true
 eureka.client.fetch-registry=true
+eureka.client.register-with-eureka=true
+
+
+# =========================================
+# Product Service Route + Rate Limiter
+# =========================================
+
+spring.cloud.gateway.server.webflux.routes[0].id=product-service
+spring.cloud.gateway.server.webflux.routes[0].uri=lb://Samsung-Digital-Commerce
+spring.cloud.gateway.server.webflux.routes[0].predicates[0]=Path=/product/**
+
+spring.cloud.gateway.server.webflux.routes[0].filters[0].name=RequestRateLimiter
+spring.cloud.gateway.server.webflux.routes[0].filters[0].args.redis-rate-limiter.replenishRate=5
+spring.cloud.gateway.server.webflux.routes[0].filters[0].args.redis-rate-limiter.burstCapacity=5
+spring.cloud.gateway.server.webflux.routes[0].filters[0].args.redis-rate-limiter.requestedTokens=1
+spring.cloud.gateway.server.webflux.routes[0].filters[0].args.key-resolver=#{@ipKeyResolver}
